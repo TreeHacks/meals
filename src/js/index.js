@@ -34,7 +34,7 @@ class MealForm extends React.Component {
   async componentDidMount() {
     var user_info = await API.get(
       "treehacks",
-      `/users/${this.props.user.username}`,
+      `/users/${this.props.user.username}/usedMeals`,
       {}
     )
       .then((response) => {
@@ -47,7 +47,7 @@ class MealForm extends React.Component {
         return error;
       });
 
-    const status = meal_info.response?.status ? meal_info.response.status : 200;
+    const status = user_info.response?.status ? user_info.response.status : 200;
     this.setState({ loading: false });
     if (status !== 200) {
       this.setState({ error: "You have don't have access" });
@@ -59,7 +59,7 @@ class MealForm extends React.Component {
 
     console.log(meal_info);
 
-    meal_info = {usedMeals: user_info.usedMeals,};
+    meal_info = {usedMeals: user_info.mealList};
 
     console.log(meal_info);
 
@@ -80,7 +80,7 @@ class MealForm extends React.Component {
     console.log("pload", payload);
     const resp = await API.put(
         "treehacks",
-        `/users/${this.props.user.username}/`,
+        `/users/${this.props.user.username}/usedMeals`,
         payload
     );
     console.log(resp);
