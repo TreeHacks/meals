@@ -8,12 +8,12 @@ const schema = {
   type: "object",
   required: [],
   properties: {
-    usedMeals: { type: "string", title: "Pending Teammates" },
+    mealList: { type: "string", title: "Used Meals" },
   },
 };
 
 const uiSchema = {
-  usedMeals: {
+  mealList: {
     "ui:placeholder": "Use meal",
   },
 };
@@ -59,7 +59,7 @@ class MealForm extends React.Component {
 
     console.log(meal_info);
 
-    meal_info = {usedMeals: user_info.mealList};
+    meal_info = {mealList: user_info.mealList};
 
     console.log(meal_info);
 
