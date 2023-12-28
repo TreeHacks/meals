@@ -1,7 +1,6 @@
 import React from "react";
 import Form from "react-jsonschema-form";
 import API from "@aws-amplify/api";
-import Loading from "./loading";
 import { Redirect } from "react-router";
 
 const schema = {
