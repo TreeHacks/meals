@@ -20,39 +20,48 @@ const uiSchema = {
 const log = (type) => console.log.bind(console, type);
 
 class MealForm extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
     this.state = {
       formSchema: schema,
       dataFetched: false,
       redirect: false,
       error: undefined,
+      username: "6566dbe994c4ef0012006625", // Example username state
     };
   }
 
   async componentDidMount() {
+    // You need to replace this with your logic to get the username
+    const username = this.getUsername();
+    this.setState({ username }, () => {
+      this.fetchUserData(this.state.username);
+    });
+  }
+
+  // Replace this with your logic to get the username
+  getUsername() {
+    return "6566dbe994c4ef0012006625";
+  }
+
+  async fetchUserData(username) {
     var user_info = await API.get(
       "treehacks",
-      `/users/${this.props.user.username}/usedMeals`,
+      `/users/${username}/usedMeals`,
       {}
     )
-      .then((response) => {
-        return response;
-      })
-      .catch((error) => {
-        // console.(error);
-        // console.log(error.response.status);
-        // console.log(error.response.data);
-        return error;
-      });
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      // Handle error
+      return error;
+    });
 
     const status = user_info.response?.status ? user_info.response.status : 200;
     this.setState({ loading: false });
     if (status !== 200) {
-      this.setState({ error: "You have don't have access" });
-      this.setState({
-        dataFetched: true,
-      });
+      this.setState({ error: "You don't have access", dataFetched: true });
       return;
     }
 
@@ -73,20 +82,19 @@ class MealForm extends React.Component {
   async submitForm(e) {
     console.log(e.formData);
     const payload = {
-      body: { ...e.formData},
+      body: { ...e.formData },
     };
 
-    console.log("pload", payload);
+    console.log("payload", payload);
     const resp = await API.put(
         "treehacks",
-        `/users/${this.props.user.username}/usedMeals`,
+        `/users/${this.state.username}/usedMeals`,
         payload
     );
     console.log(resp);
   }
 
   render() {
-    //if (false) {
     if (!this.state.dataFetched) {
     } else {
       return (
@@ -129,3 +137,4 @@ class MealForm extends React.Component {
 }
 
 export default MealForm;
+
