@@ -2,6 +2,8 @@ import React from "react";
 import Form from "react-jsonschema-form";
 import API from "@aws-amplify/api";
 import { Redirect } from "react-router";
+import ReactDOM from "react-dom";
+import * as serviceWorker from "./js/serviceWorker";
 
 const schema = {
   type: "object",
