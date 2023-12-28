@@ -6,7 +6,10 @@ import ReactDOM from "react-dom";
 import * as serviceWorker from "./js/serviceWorker";
 
 const ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_URL;
-const custom_header = process.env.CUSTOM_HEADER;
+
+export const custom_header = async () => {
+  return { Authorization: process.env.CUSTOM_HEADER };
+};
 
 API.configure({
   endpoints: [
