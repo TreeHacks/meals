@@ -107,7 +107,7 @@ class MealForm extends React.Component {
     console.log("payload", payload);
     const resp = await API.post(
         "treehacks",
-        `/users/${this.state.username}/forms/application_info/usedMeals`,
+        `/users/${this.state.username}/usedMeals`,
         payload
     );
     console.log(resp);
