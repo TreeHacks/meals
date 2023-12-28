@@ -96,7 +96,7 @@ class MealForm extends React.Component {
 
   render() {
     if (!this.state.dataFetched) {
-      return <div>Loading...</div>
+      return <div>Loading...</div>; 
     } else {
       return (
         <>
@@ -137,5 +137,14 @@ class MealForm extends React.Component {
   }
 }
 
-export default MealForm;
 
+//export default MealForm;
+
+ReactDOM.render(
+  <React.StrictMode>
+    <MealForm />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+
+serviceWorker.unregister();
