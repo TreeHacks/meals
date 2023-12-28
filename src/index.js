@@ -56,9 +56,9 @@ class MealForm extends React.Component {
       return;
     }
 
-    console.log(meal_info);
+    console.log(user_info);
 
-    meal_info = {mealList: user_info.mealList};
+    var meal_info = {mealList: user_info.mealList};
 
     console.log(meal_info);
 
@@ -88,7 +88,6 @@ class MealForm extends React.Component {
   render() {
     //if (false) {
     if (!this.state.dataFetched) {
-      return <Loading />;
     } else {
       return (
         <>
