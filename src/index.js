@@ -5,12 +5,13 @@ import { Redirect } from "react-router";
 import ReactDOM from "react-dom";
 import * as serviceWorker from "./js/serviceWorker";
 
+const ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_URL;
+
 API.configure({
   endpoints: [
     {
       name: "treehacks",
       endpoint: ENDPOINT_URL,
-      custom_header: custom_header,
     },
   ],
 });
