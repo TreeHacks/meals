@@ -6,12 +6,14 @@ import ReactDOM from "react-dom";
 import * as serviceWorker from "./js/serviceWorker";
 
 const ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_URL;
+const custom_header = process.env.CUSTOM_HEADER;
 
 API.configure({
   endpoints: [
     {
       name: "treehacks",
       endpoint: ENDPOINT_URL,
+      custom_header: custom_header,
     },
   ],
 });
