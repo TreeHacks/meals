@@ -7,8 +7,8 @@ import * as serviceWorker from "./js/serviceWorker";
 
 const ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_URL;
 
-export const custom_header = async () => {
-  return { Authorization: process.env.CUSTOM_HEADER };
+export const custom_header = () => {
+  return { Authorization: process.env.REACT_APP_JWT_TOKEN };
 };
 
 API.configure({
