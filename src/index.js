@@ -5,6 +5,17 @@ import { Redirect } from "react-router";
 import ReactDOM from "react-dom";
 import * as serviceWorker from "./js/serviceWorker";
 
+API.configure({
+  endpoints: [
+    {
+      name: "treehacks",
+      endpoint: ENDPOINT_URL,
+      custom_header: custom_header,
+    },
+  ],
+});
+
+
 const schema = {
   type: "object",
   required: [],
