@@ -43,7 +43,7 @@ class MealForm extends React.Component {
       dataFetched: false,
       redirect: false,
       error: undefined,
-      username: "6566dbe994c4ef0012006625", // Example username state
+      username: "702f951f-8719-445d-b277-eaa4ea49dd41", // Example username state
     };
   }
 
@@ -57,7 +57,7 @@ class MealForm extends React.Component {
 
   // Replace this with your logic to get the username
   getUsername() {
-    return "6566dbe994c4ef0012006625";
+    return "702f951f-8719-445d-b277-eaa4ea49dd41";
   }
 
   async fetchUserData(username) {
