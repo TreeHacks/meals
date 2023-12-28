@@ -96,6 +96,7 @@ class MealForm extends React.Component {
 
   render() {
     if (!this.state.dataFetched) {
+      return <div>Loading...</div>
     } else {
       return (
         <>
