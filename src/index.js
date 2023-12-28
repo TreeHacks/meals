@@ -66,7 +66,7 @@ class MealForm extends React.Component {
   async fetchUserData(username) {
     var user_info = await API.get(
       "treehacks",
-      `/users/${username}/forms/application_info`,
+      `/users/${username}/usedMeals`,
       {}
     )
     .then((response) => {
@@ -107,7 +107,7 @@ class MealForm extends React.Component {
     console.log("payload", payload);
     const resp = await API.put(
         "treehacks",
-        `/users/${this.state.username}/forms/usedMeals`,
+        `/users/${this.state.username}/usedMeals`,
         payload
     );
     console.log(resp);
