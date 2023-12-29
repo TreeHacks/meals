@@ -4,6 +4,8 @@ import API from "@aws-amplify/api";
 import { Redirect } from "react-router";
 import ReactDOM from "react-dom";
 import * as serviceWorker from "./js/serviceWorker";
+import queryString from "query-string";
+import { useState, useEffect } from "react";
 
 const LOGIN_URL = process.env.REACT_APP_LOGIN_URL;
 const ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_URL;
@@ -183,7 +185,7 @@ class MealForm extends React.Component {
           login();
         }
     }, []);
-    
+
     if (!this.state.dataFetched) {
       return <div>Loading...</div>; 
     } else {
