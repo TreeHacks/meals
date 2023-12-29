@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Switch, Route, Link } from "react-router-dom";
-import "./index.scss";
 import Meals from "./meals";
 import * as serviceWorker from "./js/serviceWorker";
 import API from "@aws-amplify/api";
