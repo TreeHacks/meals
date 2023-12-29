@@ -26,12 +26,12 @@ const schema = {
   type: "object",
   required: [],
   properties: {
-    pendingList: { type: "string", title: "Used Meals" },
+    mealList: { type: "string", title: "Used Meals" },
   },
 };
 
 const uiSchema = {
-  pendingList: {
+  mealList: {
     "ui:placeholder": "Use meal",
   },
 };
@@ -66,7 +66,7 @@ class MealForm extends React.Component {
   async fetchUserData(username) {
     var user_info = await API.get(
       "treehacks",
-      `/users/${username}`,
+      `/users/${username}/forms/used_meals`,
       {}
     )
     .then((response) => {
@@ -86,7 +86,7 @@ class MealForm extends React.Component {
 
     console.log(user_info);
 
-    var meal_info = {pendingList: user_info};
+    var meal_info = {mealList: user_info};
 
     console.log(meal_info);
 
@@ -107,7 +107,7 @@ class MealForm extends React.Component {
     console.log("payload", payload);
     const resp = await API.put(
         "treehacks",
-        `/users/${this.state.username}/forms/meet_info`,
+        `/users/${this.state.username}/forms/used_meals`,
         payload
     );
     console.log(resp);
