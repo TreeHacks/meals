@@ -49,9 +49,11 @@ function getCurrentUser() {
         "cognito:groups": parsed["cognito:groups"],
       };
       console.log("attributes", attributes);
-      return {
-        username: parsed["sub"],
-        attributes,
+      if (attributes["cognito:groups"].includes("organizers_current")) {
+        return {
+          username: parsed["sub"],
+          attributes,
+        };
       };
     }
   }
