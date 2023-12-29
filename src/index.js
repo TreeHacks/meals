@@ -54,6 +54,8 @@ function getCurrentUser() {
           username: parsed["sub"],
           attributes,
         };
+      } else {
+        console.log("Isn't an organizer");
       };
     }
   }
