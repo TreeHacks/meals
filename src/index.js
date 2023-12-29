@@ -111,16 +111,17 @@ class MealForm extends React.Component {
 
   async componentDidMount() {
     // Login logic
-    const [user, setUser] = useState(null);
+    //const [user, setUser] = useState(null);
     const token = new URLSearchParams(window.location.search).get("tkn");
     if (!token) {
       try {
-        setUser(getCurrentUser());
+        localStorage.setItem("jwt", getCurrentUser());
+        //setUser(getCurrentUser());
       } catch (e) {
         login();
       }
     };
-    
+
     // Rest of the logic
     const username = this.getUsername();
     this.setState({ username }, () => {
