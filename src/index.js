@@ -110,14 +110,24 @@ class MealForm extends React.Component {
   }
 
   async componentDidMount() {
-    // You need to replace this with your logic to get the username
+    // Login logic
+    const [user, setUser] = useState(null);
+    const token = new URLSearchParams(window.location.search).get("tkn");
+    if (!token) {
+      try {
+        setUser(getCurrentUser());
+      } catch (e) {
+        login();
+      }
+    };
+    
+    // Rest of the logic
     const username = this.getUsername();
     this.setState({ username }, () => {
       this.fetchUserData(this.state.username);
     });
   }
 
-  // Replace this with your logic to get the username
   getUsername() {
     return "702f951f-8719-445d-b277-eaa4ea49dd41";
   }
@@ -173,19 +183,6 @@ class MealForm extends React.Component {
   }
 
   render() {
-    const [user, setUser] = useState(null);
-    useEffect(() => {
-      const token = new URLSearchParams(window.location.search).get("tkn");
-  
-      // if an admin isn't registering an account
-      if (!token)
-        try {
-          setUser(getCurrentUser());
-        } catch (e) {
-          login();
-        }
-    }, []);
-
     if (!this.state.dataFetched) {
       return <div>Loading...</div>; 
     } else {
