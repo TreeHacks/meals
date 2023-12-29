@@ -4,6 +4,7 @@ import API from "@aws-amplify/api";
 import { Redirect } from "react-router";
 import ReactDOM from "react-dom";
 import * as serviceWorker from "./js/serviceWorker";
+import { withRouter } from 'react-router-dom'; // Import withRouter from React Router
 
 const schema = {
   type: "object",
@@ -35,7 +36,9 @@ class MealForm extends React.Component {
 
   async componentDidMount() {
     // You need to replace this with your logic to get the username
-    const username = this.getUsername();
+    const queryParams = new URLSearchParams(this.props.location.search);
+    const username = queryParams.get('username');
+    //const username =  //this.getUsername();
     this.setState({ username }, () => {
       this.fetchUserData(this.state.username);
     });
@@ -139,4 +142,4 @@ class MealForm extends React.Component {
   }
 }
 
-export default MealForm;
+export default withRouter(MealForm);
