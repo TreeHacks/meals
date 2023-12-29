@@ -10,6 +10,20 @@ import { useState, useEffect } from "react";
 const LOGIN_URL = process.env.REACT_APP_LOGIN_URL;
 const ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_URL;
 
+export const custom_header = async () => {
+  return { Authorization: await localStorage.getItem("jwt") };
+};
+
+API.configure({
+  endpoints: [
+    {
+      name: "treehacks",
+      endpoint: ENDPOINT_URL,
+      custom_header: custom_header,
+    },
+  ],
+});
+
 export function parseJwt(token) {
   var base64UrlSplit = token.split(".");
   if (!base64UrlSplit) return null;
@@ -107,17 +121,13 @@ class MealForm extends React.Component {
         login();
       }
     };
-    
-    export const custom_header = async () => {
-      return { Authorization: await localStorage.getItem("jwt") };
-    };
-    
+
     API.configure({
       endpoints: [
         {
           name: "treehacks",
           endpoint: ENDPOINT_URL,
-          custom_header: custom_header,
+          custom_header: { Authorization: await localStorage.getItem("jwt") },
         },
       ],
     });
