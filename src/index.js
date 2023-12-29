@@ -98,8 +98,8 @@ const uiSchema = {
 const log = (type) => console.log.bind(console, type);
 
 class MealForm extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       formSchema: schema,
       dataFetched: false,
@@ -121,6 +121,16 @@ class MealForm extends React.Component {
         login();
       }
     };
+
+    API.configure({
+      endpoints: [
+        {
+          name: "treehacks",
+          endpoint: ENDPOINT_URL,
+          custom_header: custom_header,
+        },
+      ],
+    });
 
     // Rest of the logic
     const username = this.getUsername();
