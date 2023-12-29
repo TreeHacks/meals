@@ -26,12 +26,12 @@ const schema = {
   type: "object",
   required: [],
   properties: {
-    mealList: { type: "string", title: "Used Meals" },
+    pendingList: { type: "string", title: "Used Meals" },
   },
 };
 
 const uiSchema = {
-  mealList: {
+  pendingList: {
     "ui:placeholder": "Use meal",
   },
 };
@@ -86,7 +86,7 @@ class MealForm extends React.Component {
 
     console.log(user_info);
 
-    var meal_info = {mealList: user_info};
+    var meal_info = {pendingList: user_info};
 
     console.log(meal_info);
 
