@@ -138,3 +138,5 @@ class MealForm extends React.Component {
     }
   }
 }
+
+export default MealForm;
