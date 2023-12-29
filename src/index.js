@@ -139,7 +139,7 @@ class MealForm extends React.Component {
                 style={{ marginTop: "0px", marginBottom: "10px" }}
                 id="formHeader"
               >
-                Make your team!
+                Use meals!
               </h1>
               <Form
                 schema={this.state.formSchema}
