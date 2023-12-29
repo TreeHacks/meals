@@ -4,60 +4,23 @@ import API from "@aws-amplify/api";
 import { Redirect } from "react-router";
 import ReactDOM from "react-dom";
 import * as serviceWorker from "./js/serviceWorker";
-import queryString from "query-string";
-import { useState, useEffect } from "react";
 
-const LOGIN_URL = process.env.REACT_APP_LOGIN_URL;
 const ENDPOINT_URL = process.env.REACT_APP_ENDPOINT_URL;
 
-export function parseJwt(token) {
-  var base64UrlSplit = token.split(".");
-  if (!base64UrlSplit) return null;
-  const base64Url = base64UrlSplit[1];
-  if (!base64Url) return null;
-  const base64 = base64Url.replace("-", "+").replace("_", "/");
-  return JSON.parse(window.atob(base64));
-}
+export const custom_header = () => {
+  return { Authorization: process.env.REACT_APP_JWT_TOKEN };
+};
 
-function getCurrentUser() {
-  const jwt = getJwt();
-  if (jwt) {
-    // Verify JWT here.
-    const parsed = parseJwt(jwt);
-    if (!parsed) {
-      console.log("JWT invalid");
-    } else if (new Date().getTime() / 1000 >= parseInt(parsed.exp)) {
-      console.log("JWT expired");
-      // TODO: add refresh token logic if we want here.
-    } else {
-      let attributes = {
-        name: parsed["name"],
-        email: parsed["email"],
-        email_verified: parsed["email_verified"],
-        "cognito:groups": parsed["cognito:groups"],
-      };
-      return {
-        username: parsed["sub"],
-        attributes,
-      };
-    }
-  }
-  // If JWT from SAML has expired, or if there is no JWT in the first place, run this code.
-  throw "No current user";
-}
+API.configure({
+  endpoints: [
+    {
+      name: "treehacks",
+      endpoint: ENDPOINT_URL,
+      custom_header: custom_header,
+    },
+  ],
+});
 
-function getJwt() {
-  return localStorage.getItem("jwt");
-}
-
-function logout() {
-  localStorage.removeItem("jwt");
-  window.location.href = `${LOGIN_URL}/logout?redirect=${window.location.href}`;
-}
-
-function login() {
-  window.location.href = `${LOGIN_URL}?redirect=${window.location.href}`;
-}
 
 const schema = {
   type: "object",
@@ -76,8 +39,8 @@ const uiSchema = {
 const log = (type) => console.log.bind(console, type);
 
 class MealForm extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
     this.state = {
       formSchema: schema,
       dataFetched: false,
@@ -88,50 +51,14 @@ class MealForm extends React.Component {
   }
 
   async componentDidMount() {
-    // Login logic
-    //const [user, setUser] = useState(null);
-    const token = new URLSearchParams(window.location.search).get("tkn");
-    if (!token) {
-      try {
-        const hash = queryString.parse(window.location.hash);
-        if (hash && hash.jwt) {
-          localStorage.setItem("jwt", hash.jwt);
-          window.location.hash = "";
-        }
-        localStorage.setItem("jwt", getCurrentUser());
-        //setUser(getCurrentUser());
-      } catch (e) {
-        login();
-      }
-    };
-
-    const hash = queryString.parse(window.location.hash);
-    if (hash && hash.jwt) {
-      localStorage.setItem("jwt", hash.jwt);
-      window.location.hash = "";
-    }
-
-    const new_header = async () => {
-      return { Authorization: await localStorage.getItem("jwt") };
-    };
-
-    API.configure({
-      endpoints: [
-        {
-          name: "treehacks",
-          endpoint: ENDPOINT_URL,
-          custom_header: new_header,
-        },
-      ],
-    });
-
-    // Rest of the logic
+    // You need to replace this with your logic to get the username
     const username = this.getUsername();
     this.setState({ username }, () => {
       this.fetchUserData(this.state.username);
     });
   }
 
+  // Replace this with your logic to get the username
   getUsername() {
     return "702f951f-8719-445d-b277-eaa4ea49dd41";
   }
