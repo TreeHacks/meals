@@ -48,6 +48,7 @@ function getCurrentUser() {
         email_verified: parsed["email_verified"],
         "cognito:groups": parsed["cognito:groups"],
       };
+      console.log("attributes", attributes);
       return {
         username: parsed["sub"],
         attributes,
