@@ -66,7 +66,7 @@ class MealForm extends React.Component {
   async fetchUserData(username) {
     var user_info = await API.get(
       "treehacks",
-      `/users/${username}/used_meals`,
+      `/users/${username}/forms/application_info`,
       {}
     )
     .then((response) => {
