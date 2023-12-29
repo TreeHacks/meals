@@ -122,12 +122,16 @@ class MealForm extends React.Component {
       }
     };
 
+    const new_header = async () => {
+      return { Authorization: await localStorage.getItem("jwt") };
+    };
+
     API.configure({
       endpoints: [
         {
           name: "treehacks",
           endpoint: ENDPOINT_URL,
-          custom_header: { Authorization: await localStorage.getItem("jwt") },
+          custom_header: new_header,
         },
       ],
     });
