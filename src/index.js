@@ -59,14 +59,6 @@ function login() {
   window.location.href = `${LOGIN_URL}?redirect=${window.location.href}`;
 }
 
-const hash = queryString.parse(window.location.hash);
-if (hash && hash.jwt) {
-  localStorage.setItem("jwt", hash.jwt);
-  window.location.hash = "";
-}
-
-
-
 const schema = {
   type: "object",
   required: [],
@@ -101,12 +93,23 @@ class MealForm extends React.Component {
     const token = new URLSearchParams(window.location.search).get("tkn");
     if (!token) {
       try {
+        const hash = queryString.parse(window.location.hash);
+        if (hash && hash.jwt) {
+          localStorage.setItem("jwt", hash.jwt);
+          window.location.hash = "";
+        }
         localStorage.setItem("jwt", getCurrentUser());
         //setUser(getCurrentUser());
       } catch (e) {
         login();
       }
     };
+
+    const hash = queryString.parse(window.location.hash);
+    if (hash && hash.jwt) {
+      localStorage.setItem("jwt", hash.jwt);
+      window.location.hash = "";
+    }
 
     const new_header = async () => {
       return { Authorization: await localStorage.getItem("jwt") };
