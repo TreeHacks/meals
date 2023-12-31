@@ -85,12 +85,25 @@ const MealForm = ({ location }) => {
     fetchUserData(username);
   }, []);
 
+  const getMeal = () => {
+    const hour = new Date().getHours();
+
+    if (hour > 6 && hour < 11) {
+      return 'Breakfast';
+    } else if (hour > 11 && hour < 14) {
+      return 'Lunch';
+    } else if (hour > 17 && hour < 21) {
+      return 'Dinner';
+    } else {
+      return null;
+    }
+  };
+
   const onFocus = () => {
     console.log('Tab is in focus');
     setIsFocused(true);
   };
 
-  // User has switched away from the tab (AKA tab is hidden)
   const onBlur = () => {
     console.log('Tab is blurred');
     setIsFocused(false);
@@ -187,8 +200,7 @@ const MealForm = ({ location }) => {
                     'text-3xl ml-4 h-12 leading-[3rem] text-tree-green-light',
                   ].join(' ')}>
                   tree
-                  <span className={['font-bold'].join(' ')}>hacks</span>
-                  {' '}meals
+                  <span className={['font-bold'].join(' ')}>hacks</span> meals
                 </p>
                 <Spacer />
                 <p
@@ -208,17 +220,55 @@ const MealForm = ({ location }) => {
               <p
                 className={[
                   styles.title,
-                  'text-4xl mt-12 mb-12 text-center text-tree-green-light font-bold',
+                  'text-4xl mt-12 text-center text-tree-green-light font-bold',
                 ].join(' ')}>
                 Scan Meals
               </p>
-              <button
-                onClick={handleScanButton}
-                className={[
-                  'hover:text-tree-green transition-all border-2 w-fit mx-auto px-4 py-1 rounded-lg text-lg',
-                ].join(' ')}>
-                {scanning ? 'Stop Scanning' : 'Start Scanning'}
-              </button>
+              {!getMeal() !== null ? (
+                <>
+                  <p className={['text-center text-xl mb-4'].join(' ')}>
+                    {/* Show day of the week */}
+                    {getMeal()}
+                  </p>
+                  <button
+                    onClick={handleScanButton}
+                    className={[
+                      'transition-all border-2 border-transparent w-fit mx-auto mt-4 px-6 py-2 rounded-xl text-lg',
+                      // 'text-white bg-tree-green-light hover:bg-white hover:border-tree-green'
+                      scanning
+                        ? 'text-white bg-red-500 hover:bg-red-600'
+                        : 'text-white bg-tree-green-light hover:bg-tree-green',
+                    ].join(' ')}>
+                    {scanning ? 'Stop Scanning' : 'Start Scanning'}
+                  </button>
+                </>
+              ) : (
+                <p className={['text-center text-xl'].join(' ')}>
+                  No meals available at this time
+                </p>
+              )}
+              {scanning && (
+                <div
+                  className={[
+                    'mt-8 mx-auto transition-all flex justify-center items-center w-1/2 max-w-2xl min-h-96',
+                    'border-2 rounded-xl flex flex-col text-center',
+                    isFocused ? 'shadow-lg' : '',
+                  ].join(' ')}>
+                  {isFocused ? (
+                    <>
+                      <p className={[''].join(' ')}>User ID:</p>
+                      <p className={[''].join(' ')}>{}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className={['text-2xl'].join(' ')}>Scanning Paused</p>
+                      <p className={['text-md mt-2 text-slate-500'].join(' ')}>
+                        Click anywhere to resume
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* <div id='form'>
