@@ -1,22 +1,19 @@
-import React from "react";
-import Form from "react-jsonschema-form";
-import API from "@aws-amplify/api";
-import { Redirect } from "react-router";
-import ReactDOM from "react-dom";
-import * as serviceWorker from "./js/serviceWorker";
+import React from 'react';
+import Form from 'react-jsonschema-form';
+import API from '@aws-amplify/api';
 import { withRouter } from 'react-router-dom'; // Import withRouter from React Router
 
 const schema = {
-  type: "object",
+  type: 'object',
   required: [],
   properties: {
-    mealList: { type: "string", title: "Used Meals" },
+    mealList: { type: 'string', title: 'Used Meals' },
   },
 };
 
 const uiSchema = {
   mealList: {
-    "ui:placeholder": "Use meal",
+    'ui:placeholder': 'Use meal',
   },
 };
 
@@ -30,8 +27,8 @@ class MealForm extends React.Component {
       dataFetched: false,
       redirect: false,
       error: undefined,
-      username: "702f951f-8719-445d-b277-eaa4ea49dd41", // Example username state
-    };  
+      username: '702f951f-8719-445d-b277-eaa4ea49dd41', // Example username state
+    };
   }
 
   async componentDidMount() {
@@ -46,22 +43,22 @@ class MealForm extends React.Component {
 
   // Replace this with your logic to get the username
   getUsername() {
-    return "702f951f-8719-445d-b277-eaa4ea49dd41";
+    return '702f951f-8719-445d-b277-eaa4ea49dd41';
   }
 
   async fetchUserData(username) {
     var user_info = await API.get(
-      "treehacks",
+      'treehacks',
       `/users/${username}/forms/used_meals`,
       {}
     )
-    .then((response) => {
-      return response;
-    })
-    .catch((error) => {
-      // Handle error
-      return error;
-    });
+      .then((response) => {
+        return response;
+      })
+      .catch((error) => {
+        // Handle error
+        return error;
+      });
 
     const status = user_info.response?.status ? user_info.response.status : 200;
     this.setState({ loading: false });
@@ -72,7 +69,7 @@ class MealForm extends React.Component {
 
     console.log(user_info);
 
-    var meal_info = {mealList: user_info};
+    var meal_info = { mealList: user_info };
 
     console.log(meal_info);
 
@@ -90,50 +87,50 @@ class MealForm extends React.Component {
       body: { ...e.formData },
     };
 
-    console.log("payload", payload);
+    console.log('payload', payload);
     const resp = await API.put(
-        "treehacks",
-        `/users/${this.state.username}/forms/used_meals`,
-        payload
+      'treehacks',
+      `/users/${this.state.username}/forms/used_meals`,
+      payload
     );
     console.log(resp);
   }
 
   render() {
     if (!this.state.dataFetched) {
-      return <div>Loading...</div>; 
+      return <div>Loading...</div>;
     } else {
       return (
         <>
           {this.state.error ? (
             <div
               style={{
-                backgroundColor: "white",
-                borderRadius: "20px",
-                margin: "0 auto",
-                padding: "20px",
-                border: "1px solid green",
-                width: "fit-content",
-                marginTop: "20px",
-              }}
-            >
+                backgroundColor: 'white',
+                borderRadius: '20px',
+                margin: '0 auto',
+                padding: '20px',
+                border: '1px solid green',
+                width: 'fit-content',
+                marginTop: '20px',
+              }}>
               Error: {this.state.error}
             </div>
           ) : (
-            <div id="form">
-              <h1
-                style={{ marginTop: "0px", marginBottom: "10px" }}
-                id="formHeader"
-              >
-                Use meals!
-              </h1>
-              <Form
-                schema={this.state.formSchema}
-                uiSchema={uiSchema}
-                onChange={log("changed")}
-                onSubmit={(e) => this.submitForm(e)}
-                onError={log("errors")}
-              />
+            <div className={['mt-12'].join(' ')}>
+              <div id='form'>
+                <h1
+                  style={{ marginTop: '0px', marginBottom: '10px' }}
+                  id='formHeader'>
+                  Use meals!
+                </h1>
+                <Form
+                  schema={this.state.formSchema}
+                  uiSchema={uiSchema}
+                  onChange={log('changed')}
+                  onSubmit={(e) => this.submitForm(e)}
+                  onError={log('errors')}
+                />
+              </div>
             </div>
           )}
         </>
