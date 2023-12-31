@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import Meals from './meals';
+import Meals from './page/meals/meals';
 import * as serviceWorker from './utils/serviceWorker';
 import API from '@aws-amplify/api';
 import queryString from 'query-string';

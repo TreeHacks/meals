@@ -3,9 +3,10 @@ import { withRouter } from 'react-router-dom'; // Import withRouter from React R
 import Form from 'react-jsonschema-form';
 import API from '@aws-amplify/api';
 
-import Spacer from './components/spacer/spacer.component';
+import Spacer from '../../components/spacer/spacer.component';
 
-import logo from './assets/logo.svg';
+import logo from './../../assets/logo.svg';
+import styles from './meals.module.scss';
 
 const schema = {
   type: 'object',
@@ -28,7 +29,9 @@ const MealForm = ({ location }) => {
   const [dataFetched, setDataFetched] = useState(false);
   const [redirect, setRedirect] = useState(false);
   const [error, setError] = useState(undefined);
-  const [username, setUsername] = useState('702f951f-8719-445d-b277-eaa4ea49dd41');
+  const [username, setUsername] = useState(
+    '702f951f-8719-445d-b277-eaa4ea49dd41'
+  );
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -43,8 +46,14 @@ const MealForm = ({ location }) => {
 
   const fetchUserData = async (username) => {
     try {
-      const user_info = await API.get('treehacks', `/users/${username}/forms/used_meals`, {});
-      const status = user_info.response?.status ? user_info.response.status : 200;
+      const user_info = await API.get(
+        'treehacks',
+        `/users/${username}/forms/used_meals`,
+        {}
+      );
+      const status = user_info.response?.status
+        ? user_info.response.status
+        : 200;
       if (status !== 200) {
         setError("You don't have access");
         setDataFetched(true);
@@ -70,7 +79,11 @@ const MealForm = ({ location }) => {
     };
     console.log('payload', payload);
     try {
-      const resp = await API.put('treehacks', `/users/${username}/forms/used_meals`, payload);
+      const resp = await API.put(
+        'treehacks',
+        `/users/${username}/forms/used_meals`,
+        payload
+      );
       console.log(resp);
     } catch (error) {
       // Handle error
@@ -94,13 +107,13 @@ const MealForm = ({ location }) => {
               width: 'fit-content',
               marginTop: '20px',
             }}>
-            Error: {error}
+            Error:
           </div>
         ) : (
           <div className={[''].join(' ')}>
             <nav
               className={[
-                'w-full shadow-md px-8 py-3 justify-center items-center flex',
+                'w-full shadow-md px-8 py-4 justify-center items-center flex',
               ].join(' ')}>
               <div className={['max-w-6xl w-full flex'].join(' ')}>
                 <img
@@ -108,11 +121,18 @@ const MealForm = ({ location }) => {
                   alt='logo'
                   className='h-12'
                 />
-                <p className={[''].join(' ')}>
-                  treehacks
+                <p
+                  className={[
+                    'text-3xl ml-4 h-12 leading-[3rem] text-tree-green',
+                  ].join(' ')}>
+                  tree
+                  <span className={['font-bold'].join(' ')}>hacks</span>
                 </p>
                 <Spacer />
-                <p>
+                <p
+                  className={[
+                    'text-lg ml-4 h-12 leading-[3rem] hover:text-tree-green hover:cursor-pointer text-slate-500',
+                  ].join(' ')}>
                   log out
                 </p>
               </div>
