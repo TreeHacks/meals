@@ -94,7 +94,7 @@ function App() {
       try {
         setUser(getCurrentUser());
       } catch (e) {
-        // login();
+        login();
       }
   }, []);
   let user_url = user && user.username ? '/users/' + user.username : '/';

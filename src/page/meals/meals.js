@@ -155,7 +155,7 @@ const MealForm = ({ location }) => {
     } catch (error) {
       // Handle error
       setDataFetched(true);
-      setError(error);
+      setError('Cannot fetch data');
     }
   };
 
@@ -194,7 +194,7 @@ const MealForm = ({ location }) => {
               width: 'fit-content',
               marginTop: '20px',
             }}>
-            Error:
+            Error: {error}
           </div>
         ) : (
           <div className={['h-screen bg-[#fefafc]'].join(' ')}>
