@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom'; // Import withRouter from React Router
 import API from '@aws-amplify/api';
 
@@ -51,6 +51,8 @@ const MealForm = ({ location }) => {
           time: new Date().toLocaleString(),
         });
 
+        console.log(logs);
+
         setScannedCode([]);
       } else {
         console.log(e.key);
@@ -85,7 +87,7 @@ const MealForm = ({ location }) => {
     fetchUserData(username);
   }, []);
 
-  const getMeal = () => {
+  const getMeal = useCallback( () => {
     const hour = new Date().getHours();
 
     if (hour > 6 && hour < 11) {
@@ -97,22 +99,33 @@ const MealForm = ({ location }) => {
     } else {
       return null;
     }
-  };
+  }, []);
 
-  const onFocus = () => {
+  const getBorderColor = useCallback(() => {
+    if (!isFocused) {
+      return 'shadow-md';
+    } else if (logs.length > 0) {
+      return 'shadow-lg shadow-tree-green border-tree-green';
+    } else {
+      // Scanning but no logs
+      return 'border-slate-500';
+    }
+  }, [isFocused, logs]);
+
+  const onFocus = useCallback(() => {
     console.log('Tab is in focus');
     setIsFocused(true);
-  };
+  }, []);
 
-  const onBlur = () => {
+  const onBlur = useCallback(() => {
     console.log('Tab is blurred');
     setIsFocused(false);
-  };
+  }, []);
 
-  const handleScanButton = () => {
+  const handleScanButton = useCallback(() => {
     setScanning(!scanning);
     setScannedCode([]);
-  };
+  }, [scanning]);
 
   const getUsername = () => {
     return '702f951f-8719-445d-b277-eaa4ea49dd41';
@@ -230,34 +243,44 @@ const MealForm = ({ location }) => {
                     {/* Show day of the week */}
                     {getMeal()}
                   </p>
-                  <button
+                  {/* Can't be a button because it will react to enter key */}
+                  <p
                     onClick={handleScanButton}
                     className={[
-                      'transition-all border-2 border-transparent w-fit mx-auto mt-4 px-6 py-2 rounded-xl text-lg',
+                      'transition-all cursor-pointer border-2 border-transparent w-fit mx-auto mt-4 mb-2 px-6 py-2 rounded-xl text-lg',
                       // 'text-white bg-tree-green-light hover:bg-white hover:border-tree-green'
                       scanning
                         ? 'text-white bg-red-500 hover:bg-red-600'
                         : 'text-white bg-tree-green-light hover:bg-tree-green',
                     ].join(' ')}>
                     {scanning ? 'Stop Scanning' : 'Start Scanning'}
-                  </button>
+                  </p>
                 </>
               ) : (
                 <p className={['text-center text-xl'].join(' ')}>
                   No meals available at this time
                 </p>
               )}
+
               {scanning && (
                 <div
                   className={[
                     'mt-8 mx-auto transition-all flex justify-center items-center w-1/2 max-w-2xl min-h-96',
                     'border-2 rounded-xl flex flex-col text-center',
-                    isFocused ? 'shadow-lg' : '',
+                    getBorderColor(),
                   ].join(' ')}>
                   {isFocused ? (
                     <>
-                      <p className={[''].join(' ')}>User ID:</p>
-                      <p className={[''].join(' ')}>{}</p>
+                      {logs.length > 0 ? (
+                        <>
+                          <p className={[''].join(' ')}>User ID:</p>
+                          <p className={[''].join(' ')}>{}</p>
+                        </>
+                      ) : (
+                        <p className={['text-2xl text-slate-500'].join(' ')}>
+                          Scan away!
+                        </p>
+                      )}
                     </>
                   ) : (
                     <>
