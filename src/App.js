@@ -101,9 +101,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div id='menu'>
         <Meals user={user} />
-      </div>
     </BrowserRouter>
   );
 }
