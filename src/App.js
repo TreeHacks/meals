@@ -101,7 +101,7 @@ function App() {
 
   return (
     <BrowserRouter>
-        <Meals user={user} />
+      <Meals user={user} />
     </BrowserRouter>
   );
 }
