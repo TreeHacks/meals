@@ -7,26 +7,22 @@ import Spacer from '../../components/spacer/spacer.component';
 import logo from './../../assets/logo.svg';
 import styles from './meals.module.scss';
 
-const schema = {
-  type: 'object',
-  required: [],
-  properties: {
-    mealList: { type: 'string', title: 'Used Meals' },
-  },
-};
+// const schema = {
+//   type: 'object',
+//   required: [],
+//   properties: {
+//     mealList: { type: 'string', title: 'Used Meals' },
+//   },
+// };
 
-const uiSchema = {
-  mealList: {
-    'ui:placeholder': 'Use meal',
-  },
-};
+// const uiSchema = {
+//   mealList: {
+//     'ui:placeholder': 'Use meal',
+//   },
+// };
 
-const log = (type) => console.log.bind(console, type);
-
-const MealForm = ({ location }) => {
-  const [formSchema, setFormSchema] = useState(schema);
+const Meals = ({ logout }) => {
   const [dataFetched, setDataFetched] = useState(false);
-  const [redirect, setRedirect] = useState(false);
   const [error, setError] = useState(undefined);
   const [username, setUsername] = useState(
     '702f951f-8719-445d-b277-eaa4ea49dd41'
@@ -81,13 +77,13 @@ const MealForm = ({ location }) => {
   }, []);
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const username = queryParams.get('username');
-    setUsername(username);
+    // const queryParams = new URLSearchParams(location.search);
+    // const username = queryParams.get('username');
+    // setUsername(username);
     fetchUserData(username);
   }, []);
 
-  const getMeal = useCallback( () => {
+  const getMeal = useCallback(() => {
     const hour = new Date().getHours();
 
     if (hour > 6 && hour < 11) {
@@ -183,7 +179,7 @@ const MealForm = ({ location }) => {
   } else {
     return (
       <>
-        {!error ? (
+        {error ? (
           <div
             style={{
               backgroundColor: 'white',
@@ -217,6 +213,7 @@ const MealForm = ({ location }) => {
                 </p>
                 <Spacer />
                 <p
+                  onClick={logout}
                   className={[
                     'text-lg ml-4 h-12 leading-[3rem] hover:text-tree-green hover:cursor-pointer text-slate-500',
                   ].join(' ')}>
@@ -315,4 +312,4 @@ const MealForm = ({ location }) => {
   }
 };
 
-export default withRouter(MealForm);
+export default Meals;
