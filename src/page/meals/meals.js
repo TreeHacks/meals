@@ -237,9 +237,9 @@ const MealForm = ({ location }) => {
                 ].join(' ')}>
                 Scan Meals
               </p>
-              {!getMeal() !== null ? (
+              {getMeal() !== null ? (
                 <>
-                  <p className={['text-center text-xl mb-4'].join(' ')}>
+                  <p className={['text-center text-xl mt-4 mb-4'].join(' ')}>
                     {/* Show day of the week */}
                     {getMeal()}
                   </p>
@@ -257,7 +257,7 @@ const MealForm = ({ location }) => {
                   </p>
                 </>
               ) : (
-                <p className={['text-center text-xl'].join(' ')}>
+                <p className={['text-center text-xl mt-6'].join(' ')}>
                   No meals available at this time
                 </p>
               )}
