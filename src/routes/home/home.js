@@ -14,10 +14,13 @@ const Meals = ({ logout }) => {
   const [isFocused, setIsFocused] = useState(true);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
-  const [mode, setMode] = useState('scan');
+  const [mode, setMode] = useState('scan'); // mode is "scan" if using a scanner, otherwise "manual" if using a phone
 
   const extraneousKeys = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab'];
 
+  /**
+   * Returns the current meal based on the time of day. Returns null if no meal is available
+   */
   const getMeal = useCallback(() => {
     const hour = new Date().getHours();
 
@@ -25,19 +28,26 @@ const Meals = ({ logout }) => {
       return 'Breakfast';
     } else if (hour > 11 && hour < 14) {
       return 'Lunch';
-    } else if (hour > 17 && hour < 24) {
+    } else if (hour > 17 && hour < 21) {
       return 'Dinner';
     } else {
       return null;
     }
   }, []);
 
+  /**
+   * Returns the current meal code based on the time of day. Returns null if no meal is available
+   *
+   * Format: <3 letter day>-<meal>
+   * Example: fri-lunch
+   *
+   */
   const getMealCode = useCallback(() => {
     // 3 Letter week day
     const day = new Date()
       .toLocaleString('en-us', { weekday: 'short' })
       .toLowerCase();
-    const meal = getMeal()?.[0].toLowerCase();
+    const meal = getMeal()?.toLowerCase();
 
     if (meal === null || meal === undefined) {
       return null;
@@ -46,6 +56,11 @@ const Meals = ({ logout }) => {
     return `${day}-${meal}`;
   }, [getMeal]);
 
+  /**
+   * Fetches user data from the API. Saves error to state if there was an error
+   * @param {string} user_id - The user's id
+   * @returns {object} - The user's data, or null if there was an error
+   */
   const fetchUserData = useCallback(async (user_id) => {
     try {
       const user_info = await API.get(
@@ -74,6 +89,13 @@ const Meals = ({ logout }) => {
     }
   }, []);
 
+  /**
+   * Handles scanning a user's code. Updates the user's meal list if the user is approved.
+   * Saves the user's id, status, and timestamp to logs. To handle accidental double scans,
+   * if a user is scanned within 1 minute of the previous scan, the user's status is set to the previous status.
+   *
+   * @param {string} user_id - The user's id
+   */
   const handleScan = useCallback(
     async (user_id) => {
       setError(null); // Reset error
@@ -143,6 +165,10 @@ const Meals = ({ logout }) => {
     [error, fetchUserData, getMealCode, logs, setUser]
   );
 
+  /**
+   * Updates the border color of the scanning box based on the last scanned user's status
+   * @returns {string} - The border color
+   */
   const getBorderColor = useCallback(() => {
     if (!isFocused) {
       return 'shadow-md';
@@ -159,22 +185,36 @@ const Meals = ({ logout }) => {
     }
   }, [isFocused, logs]);
 
+  /**
+   * Handles when the window is focused
+   */
   const onFocus = useCallback(() => {
     console.log('Tab is in focus');
     setIsFocused(true);
   }, []);
 
+  /**
+   * Handles when the window is blurred
+   */
   const onBlur = useCallback(() => {
     console.log('Tab is blurred');
     setIsFocused(false);
     setScannedCode([]);
   }, []);
 
+  /**
+   * Handles when the scan button is clicked. Toggles scanning and resets scannedCode
+   */
   const handleScanButton = useCallback(() => {
     setScanning(!scanning);
     setScannedCode([]);
   }, [scanning]);
 
+  /**
+   * Updates the user's meal list, given the user's id and updated meal list
+   * @param {string} user_id - The user's id
+   * @param {string} meal_info - The user's updated meal list
+   */
   const updateUserMeals = async (user_id, meal_info) => {
     const payload = {
       body: {
@@ -196,6 +236,9 @@ const Meals = ({ logout }) => {
     }
   };
 
+  /**
+   * Detects if the user is scanning a code manually - like with their phone. If so, parse the code and treat it as a scan
+   */
   useEffect(() => {
     const queryParams = queryString.parse(window.location.search);
 
@@ -207,6 +250,10 @@ const Meals = ({ logout }) => {
     }
   }, []);
 
+  /**
+   * Detects a key press. If the key is enter, parse all the keys pressed and filter out extraneous keys.
+   * Then, join the array into a string and call the handleScan function with the string as the user id.
+   */
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Enter') {
@@ -237,6 +284,9 @@ const Meals = ({ logout }) => {
     };
   }, [scannedCode]); // Add scannedCode as a dependency
 
+  /**
+   * Detects if the window is focused or blurred. If the window is blurred, pause scanning.
+   */
   useEffect(() => {
     window.addEventListener('focus', onFocus);
     window.addEventListener('blur', onBlur);
@@ -251,6 +301,7 @@ const Meals = ({ logout }) => {
 
   return (
     <div className={['h-screen bg-[#fefafc]'].join(' ')}>
+      {/* Navbar */}
       <nav
         className={[
           'sticky z-10 bg-white w-full shadow-md px-8 py-4 justify-center items-center flex font-roboto',
@@ -279,6 +330,7 @@ const Meals = ({ logout }) => {
         </div>
       </nav>
 
+      {/* Body */}
       <div
         className={[
           styles.body,
@@ -292,14 +344,17 @@ const Meals = ({ logout }) => {
           Scan Meals
         </p>
 
+        {/* Check if there are meals */}
         {getMeal() !== null ? (
           <>
+            {/* Display meal */}
             <p className={['text-center text-xl mt-4 mb-4'].join(' ')}>
               {/* Show day of the week */}
               {new Date().toLocaleString('en-us', { weekday: 'long' })}{' '}
               {getMeal()}
             </p>
-            {/* Can't be a button because it will react to enter key */}
+
+            {/* If mode is scan, then show button */}
             {mode === 'scan' && (
               <p
                 onClick={handleScanButton}
@@ -314,6 +369,7 @@ const Meals = ({ logout }) => {
               </p>
             )}
 
+            {/* If currently scanning, or mode is manual, show the scan status */}
             {(scanning || mode === 'manual') && (
               <div
                 className={[
@@ -321,8 +377,10 @@ const Meals = ({ logout }) => {
                   'border-2 rounded-xl flex flex-col text-center',
                   getBorderColor(),
                 ].join(' ')}>
+                {/* Check if window is focused */}
                 {isFocused ? (
                   <>
+                    {/* Check if there are any scanned users */}
                     {logs.length > 0 ? (
                       <>
                         <p className={['text-xl'].join(' ')}>User ID:</p>
@@ -370,21 +428,6 @@ const Meals = ({ logout }) => {
           </p>
         )}
       </div>
-
-      {/* <div id='form'>
-              <h1
-                style={{ marginTop: '0px', marginBottom: '10px' }}
-                id='formHeader'>
-                Use meals!
-              </h1>
-              <Form
-                schema={formSchema}
-                uiSchema={uiSchema}
-                onChange={log('changed')}
-                onSubmit={(e) => submitForm(e)}
-                onError={log('errors')}
-              />
-            </div> */}
     </div>
   );
 };
