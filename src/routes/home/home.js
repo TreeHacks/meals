@@ -1,25 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom'; // Import withRouter from React Router
 import API from '@aws-amplify/api';
+import queryString from 'query-string';
 
 import Spacer from '../../components/spacer/spacer.component';
 
 import logo from './../../assets/logo.svg';
 import styles from './home.module.scss';
-
-// const schema = {
-//   type: 'object',
-//   required: [],
-//   properties: {
-//     mealList: { type: 'string', title: 'Used Meals' },
-//   },
-// };
-
-// const uiSchema = {
-//   mealList: {
-//     'ui:placeholder': 'Use meal',
-//   },
-// };
 
 const Meals = ({ logout }) => {
   const [logs, setLogs] = useState([]); // Stores timestamps of scanned codes - if a code is scanned within 1 minute of the previous code, it is approved
@@ -28,86 +14,9 @@ const Meals = ({ logout }) => {
   const [isFocused, setIsFocused] = useState(true);
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
+  const [mode, setMode] = useState('scan');
 
   const extraneousKeys = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab'];
-
-  useEffect(() => {
-    function handleKeyDown(e) {
-      if (e.key === 'Enter') {
-        const code = scannedCode
-          .filter((x) => !extraneousKeys.includes(x)) // Remove extraneous keys
-          .join(''); // Join the array into a string
-        console.log(code);
-
-        handleScan(code);
-
-        console.log(logs);
-
-        setScannedCode([]);
-      } else {
-        console.log(e.key);
-        setScannedCode((prevScannedCode) => [...prevScannedCode, e.key]);
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    // Clean up the event listener
-    return function cleanup() {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [scannedCode]); // Add scannedCode as a dependency
-
-  useEffect(() => {
-    window.addEventListener('focus', onFocus);
-    window.addEventListener('blur', onBlur);
-    // Calls onFocus when the window first loads
-    onFocus();
-    // Specify how to clean up after this effect:
-    return () => {
-      window.removeEventListener('focus', onFocus);
-      window.removeEventListener('blur', onBlur);
-    };
-  }, []);
-
-  const handleScan = async (user_id) => {
-    setError(null); // Reset error
-
-    const mealCode = getMealCode();
-
-    user_id = '702f951f-8719-445d-b277-eaa4ea49dd41'
-
-    const user_info = await fetchUserData(user_id);
-
-    console.log('after', error, user_info);
-
-    if (error === null && user_info !== null) {
-      const mealList = user_info.mealList;
-
-      setUser({
-        user_id: user_id,
-        mealList: mealList,
-      });
-
-      const meals = mealList.split(' ');
-      const status = !meals.includes(mealCode) ? 'approved' : 'denied';
-
-      logs.push({
-        code: user_id,
-        status: status,
-        time: new Date().toLocaleString(),
-      });
-
-      console.log('logs', logs);
-      console.log('status', status, meals);
-
-      if (status === 'approved') {
-        // Append meal code to user's meal list
-        const updated_meal_info = mealList + ' ' + mealCode;
-        await updateUserMeals(user_id, updated_meal_info);
-      }
-    }
-  };
 
   const getMeal = useCallback(() => {
     const hour = new Date().getHours();
@@ -125,7 +34,9 @@ const Meals = ({ logout }) => {
 
   const getMealCode = useCallback(() => {
     // 3 Letter week day
-    const day = new Date().toLocaleString('en-us', { weekday: 'short' });
+    const day = new Date()
+      .toLocaleString('en-us', { weekday: 'short' })
+      .toLowerCase();
     const meal = getMeal()[0].toLowerCase();
 
     if (meal === null) {
@@ -134,6 +45,79 @@ const Meals = ({ logout }) => {
 
     return `${day}-${meal}`;
   }, [getMeal]);
+
+  const fetchUserData = useCallback(async (user_id) => {
+    try {
+      const user_info = await API.get(
+        'treehacks',
+        `/users/${user_id}/forms/used_meals`,
+        {}
+      );
+      const status = user_info.response?.status
+        ? user_info.response.status
+        : 200;
+
+      if (status !== 200) {
+        console.log("Error: You don't have access");
+        setError("Error: You don't have access");
+        return null;
+      }
+
+      console.log('user_info', user_info);
+
+      return user_info;
+    } catch (error) {
+      // Handle error
+      console.log('error', error);
+      setError(error.message);
+      return null;
+    }
+  }, []);
+
+  const handleScan = useCallback(
+    async (user_id) => {
+      setError(null); // Reset error
+
+      const mealCode = getMealCode();
+
+      user_id = '702f951f-8719-445d-b277-eaa4ea49dd41';
+
+      const user_info = await fetchUserData(user_id);
+
+      console.log('after', error, user_info);
+
+      if (error === null && user_info !== null) {
+        const mealList = user_info.mealList;
+
+        setUser({
+          user_id: user_id,
+          mealList: mealList,
+        });
+
+        const meals = mealList.split(' ');
+        const status = !meals.includes(mealCode) ? 'approved' : 'denied';
+
+        setLogs((prevLogs) => [
+          ...prevLogs,
+          {
+            code: user_id,
+            status: status,
+            time: new Date().toLocaleString(),
+          },
+        ]);
+
+        console.log('logs', logs);
+        console.log('status', status, meals);
+
+        if (status === 'approved') {
+          // Append meal code to user's meal list
+          const updated_meal_info = mealList + ' ' + mealCode;
+          await updateUserMeals(user_id, updated_meal_info);
+        }
+      }
+    },
+    [error, fetchUserData, getMealCode, logs, setUser]
+  );
 
   const getBorderColor = useCallback(() => {
     if (!isFocused) {
@@ -167,34 +151,6 @@ const Meals = ({ logout }) => {
     setScannedCode([]);
   }, [scanning]);
 
-  const fetchUserData = async (user_id) => {
-    try {
-      const user_info = await API.get(
-        'treehacks',
-        `/users/${user_id}/forms/used_meals`,
-        {}
-      );
-      const status = user_info.response?.status
-        ? user_info.response.status
-        : 200;
-
-      if (status !== 200) {
-        console.log("Error: You don't have access");
-        setError("Error: You don't have access");
-        return null;
-      }
-
-      console.log('user_info', user_info);
-
-      return user_info;
-    } catch (error) {
-      // Handle error
-      console.log('error', error);
-      setError(error.message);
-      return null;
-    }
-  };
-
   const updateUserMeals = async (user_id, meal_info) => {
     const payload = {
       body: {
@@ -215,6 +171,57 @@ const Meals = ({ logout }) => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    const queryParams = queryString.parse(window.location.search);
+
+    if ('id' in queryParams && queryParams.id !== '') {
+      setMode('manual');
+      handleScan(queryParams['id']);
+    }
+  }, []);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Enter') {
+        const code = scannedCode
+          .filter((x) => !extraneousKeys.includes(x)) // Remove extraneous keys
+          .join(''); // Join the array into a string
+
+        console.log(code);
+
+        const queryParams = queryString.parse(code); // Parse url to get user id
+
+        if ('id' in queryParams && queryParams.id !== '') {
+          handleScan(queryParams['id']);
+        }
+
+        setScannedCode([]);
+      } else {
+        console.log(e.key);
+        setScannedCode((prevScannedCode) => [...prevScannedCode, e.key]);
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Clean up the event listener
+    return function cleanup() {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [scannedCode]); // Add scannedCode as a dependency
+
+  useEffect(() => {
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('blur', onBlur);
+    // Calls onFocus when the window first loads
+    onFocus();
+    // Specify how to clean up after this effect:
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, []);
 
   return (
     <div className={['h-screen bg-[#fefafc]'].join(' ')}>
@@ -258,6 +265,7 @@ const Meals = ({ logout }) => {
           ].join(' ')}>
           Scan Meals
         </p>
+
         {getMeal() !== null ? (
           <>
             <p className={['text-center text-xl mt-4 mb-4'].join(' ')}>
@@ -266,17 +274,19 @@ const Meals = ({ logout }) => {
               {getMeal()}
             </p>
             {/* Can't be a button because it will react to enter key */}
-            <p
-              onClick={handleScanButton}
-              className={[
-                'transition-all cursor-pointer border-2 border-transparent w-fit mx-auto mt-4 mb-2 px-6 py-2 rounded-lg text-lg',
-                // 'text-white bg-tree-green-light hover:bg-white hover:border-tree-green'
-                scanning
-                  ? 'text-white bg-red-500 hover:bg-red-600'
-                  : 'text-white bg-tree-green-light hover:bg-tree-green',
-              ].join(' ')}>
-              {scanning ? 'Stop Scanning' : 'Start Scanning'}
-            </p>
+            {mode === 'scan' && (
+              <p
+                onClick={handleScanButton}
+                className={[
+                  'transition-all cursor-pointer border-2 border-transparent w-fit mx-auto mt-4 mb-2 px-6 py-2 rounded-lg text-lg',
+                  // 'text-white bg-tree-green-light hover:bg-white hover:border-tree-green'
+                  scanning
+                    ? 'text-white bg-red-500 hover:bg-red-600'
+                    : 'text-white bg-tree-green-light hover:bg-tree-green',
+                ].join(' ')}>
+                {scanning ? 'Stop Scanning' : 'Start Scanning'}
+              </p>
+            )}
           </>
         ) : (
           <p className={['text-center text-xl mt-6'].join(' ')}>
@@ -284,7 +294,7 @@ const Meals = ({ logout }) => {
           </p>
         )}
 
-        {scanning && (
+        {(scanning || mode === 'manual') && (
           <div
             className={[
               'mt-8 mx-auto transition-all flex justify-center items-center w-1/2 max-w-2xl min-h-96',
@@ -296,8 +306,25 @@ const Meals = ({ logout }) => {
                 {logs.length > 0 ? (
                   <>
                     <p className={['text-xl'].join(' ')}>User ID:</p>
-                    <p className={['text-xl text-tree-green'].join(' ')}>
+                    <p
+                      className={[
+                        'text-xl',
+                        logs[logs.length - 1].status === 'approved'
+                          ? 'text-tree-green'
+                          : 'text-red-500',
+                      ].join(' ')}>
                       {user?.user_id}
+                    </p>
+                    <p
+                      className={[
+                        'text-xl mt-4',
+                        logs[logs.length - 1].status === 'approved'
+                          ? 'text-tree-green'
+                          : 'text-red-500',
+                      ].join(' ')}>
+                      {logs[logs.length - 1].status === 'approved'
+                        ? 'Approved'
+                        : 'Denied (already scanned)'}
                     </p>
                   </>
                 ) : (
