@@ -7,6 +7,8 @@ import Spacer from '../../components/spacer/spacer.component';
 import logo from './../../assets/logo.svg';
 import styles from './home.module.scss';
 
+const extraneousKeys = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab']; // Keys to ignore when scanning
+
 const Meals = ({ logout }) => {
   const [logs, setLogs] = useState([]); // Stores timestamps of scanned codes - if a code is scanned within 1 minute of the previous code, it is approved
   const [scanning, setScanning] = useState(false);
@@ -15,8 +17,6 @@ const Meals = ({ logout }) => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
   const [mode, setMode] = useState('scan'); // mode is "scan" if using a scanner, otherwise "manual" if using a phone
-
-  const extraneousKeys = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab'];
 
   /**
    * Returns the current meal based on the time of day. Returns null if no meal is available
