@@ -95,7 +95,26 @@ const Meals = ({ logout }) => {
         });
 
         const meals = mealList.split(' ');
-        const status = !meals.includes(mealCode) ? 'approved' : 'denied';
+        var status = !meals.includes(mealCode) ? 'approved' : 'denied';
+
+        /* Check if user_id was already scanned within the last minute
+         * If so, set status to the previous status
+         */
+        for (let i = logs.length - 1; i >= 0; i--) {
+          const log = logs[i];
+
+          if (log.code === user_id) {
+            const logTime = new Date(log.time);
+            const currentTime = new Date();
+
+            const timeDiff = currentTime.getTime() - logTime.getTime();
+            const minutes = Math.floor(timeDiff / 1000 / 60);
+
+            if (minutes < 1) {
+              status = log.status;
+            }
+          }
+        }
 
         setLogs((prevLogs) => [
           ...prevLogs,
