@@ -22,15 +22,12 @@ import styles from './meals.module.scss';
 // };
 
 const Meals = ({ logout }) => {
-  const [dataFetched, setDataFetched] = useState(false);
-  const [error, setError] = useState(undefined);
-  const [username, setUsername] = useState(
-    '702f951f-8719-445d-b277-eaa4ea49dd41'
-  );
   const [logs, setLogs] = useState([]); // Stores timestamps of scanned codes - if a code is scanned within 1 minute of the previous code, it is approved
   const [scanning, setScanning] = useState(false);
   const [scannedCode, setScannedCode] = useState([]);
   const [isFocused, setIsFocused] = useState(true);
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
 
   const extraneousKeys = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab'];
 
@@ -42,10 +39,7 @@ const Meals = ({ logout }) => {
           .join(''); // Join the array into a string
         console.log(code);
 
-        logs.push({
-          code: code,
-          time: new Date().toLocaleString(),
-        });
+        handleScan(code);
 
         console.log(logs);
 
@@ -76,12 +70,44 @@ const Meals = ({ logout }) => {
     };
   }, []);
 
-  useEffect(() => {
-    // const queryParams = new URLSearchParams(location.search);
-    // const username = queryParams.get('username');
-    // setUsername(username);
-    fetchUserData(username);
-  }, []);
+  const handleScan = async (user_id) => {
+    setError(null); // Reset error
+
+    const mealCode = getMealCode();
+
+    user_id = '702f951f-8719-445d-b277-eaa4ea49dd41'
+
+    const user_info = await fetchUserData(user_id);
+
+    console.log('after', error, user_info);
+
+    if (error === null && user_info !== null) {
+      const mealList = user_info.mealList;
+
+      setUser({
+        user_id: user_id,
+        mealList: mealList,
+      });
+
+      const meals = mealList.split(' ');
+      const status = meals.includes(mealCode) ? 'approved' : 'denied';
+
+      logs.push({
+        code: user_id,
+        status: status,
+        time: new Date().toLocaleString(),
+      });
+
+      console.log('logs', logs);
+      console.log('status', status, meals);
+
+      if (status === 'approved') {
+        // Append meal code to user's meal list
+        const updated_meal_info = mealList + ' ' + mealCode;
+        await updateUserMeals(user_id, updated_meal_info);
+      }
+    }
+  };
 
   const getMeal = useCallback(() => {
     const hour = new Date().getHours();
@@ -90,18 +116,30 @@ const Meals = ({ logout }) => {
       return 'Breakfast';
     } else if (hour > 11 && hour < 14) {
       return 'Lunch';
-    } else if (hour > 17 && hour < 21) {
+    } else if (hour > 17 && hour < 24) {
       return 'Dinner';
     } else {
       return null;
     }
   }, []);
 
+  const getMealCode = useCallback(() => {
+    // 3 Letter week day
+    const day = new Date().toLocaleString('en-us', { weekday: 'short' });
+    const meal = getMeal()[0].toLowerCase();
+
+    if (meal === null) {
+      return null;
+    }
+
+    return `${day}-${meal}`;
+  }, [getMeal]);
+
   const getBorderColor = useCallback(() => {
     if (!isFocused) {
       return 'shadow-md';
     } else if (logs.length > 0) {
-      if (true) {
+      if (logs[logs.length - 1].status === 'approved') {
         return 'shadow-lg shadow-tree-green border-tree-green';
       } else {
         // Already scanned
@@ -129,178 +167,158 @@ const Meals = ({ logout }) => {
     setScannedCode([]);
   }, [scanning]);
 
-  const getUsername = () => {
-    return '702f951f-8719-445d-b277-eaa4ea49dd41';
-  };
-
-  const fetchUserData = async (username) => {
+  const fetchUserData = async (user_id) => {
     try {
       const user_info = await API.get(
         'treehacks',
-        `/users/${username}/forms/used_meals`,
+        `/users/${user_id}/forms/used_meals`,
         {}
       );
       const status = user_info.response?.status
         ? user_info.response.status
         : 200;
+
       if (status !== 200) {
         console.log("Error: You don't have access");
-        setError("You don't have access");
-        setDataFetched(true);
-        return;
+        setError("Error: You don't have access");
+        return null;
       }
-      console.log("user", user_info);
-      const meal_info = { mealList: user_info };
-      console.log("meal", meal_info);
-      if (meal_info) {
-        setDataFetched(true);
-      }
+
+      console.log('user_info', user_info);
+
+      return user_info;
     } catch (error) {
       // Handle error
       console.log('error', error);
-      setDataFetched(true);
-      setError('Cannot fetch data');
+      setError(error.message);
+      return null;
     }
   };
 
-  const submitForm = async (e) => {
-    console.log(e.formData);
+  const updateUserMeals = async (user_id, meal_info) => {
     const payload = {
-      body: { ...e.formData },
+      body: {
+        mealList: meal_info,
+      },
     };
-    console.log('payload', payload);
+
     try {
-      const resp = await API.put(
+      const response = await API.put(
         'treehacks',
-        `/users/${username}/forms/used_meals`,
+        `/users/${user_id}/forms/used_meals`,
         payload
       );
-      console.log(resp);
+
+      console.log(response);
     } catch (error) {
       // Handle error
       console.log(error);
     }
   };
 
-  if (!dataFetched) {
-    return <div>Loading...</div>;
-  } else {
-    return (
-      <>
-        {/* Remove the ! */}
-        {!error ? (
-          <div
-            style={{
-              backgroundColor: 'white',
-              borderRadius: '20px',
-              margin: '0 auto',
-              padding: '20px',
-              border: '1px solid green',
-              width: 'fit-content',
-              marginTop: '20px',
-            }}>
-            Error: {error}
-          </div>
+  return (
+    <div className={['h-screen bg-[#fefafc]'].join(' ')}>
+      <nav
+        className={[
+          'sticky z-10 bg-white w-full shadow-md px-8 py-4 justify-center items-center flex font-roboto',
+        ].join(' ')}>
+        <div className={['max-w-6xl w-full flex'].join(' ')}>
+          <img
+            src={logo}
+            alt='logo'
+            className='h-12'
+          />
+          <p
+            className={[
+              'text-3xl ml-4 h-12 leading-[3rem] text-tree-green-light',
+            ].join(' ')}>
+            tree
+            <span className={['font-bold'].join(' ')}>hacks</span> meals
+          </p>
+          <Spacer />
+          <p
+            onClick={logout}
+            className={[
+              'text-lg ml-4 h-12 leading-[3rem] hover:text-tree-green hover:cursor-pointer text-slate-500',
+            ].join(' ')}>
+            log out
+          </p>
+        </div>
+      </nav>
+
+      <div
+        className={[
+          styles.body,
+          'font-roboto z-0 flex justify-center flex-col',
+        ].join(' ')}>
+        <p
+          className={[
+            styles.title,
+            'text-4xl mt-12 text-center text-tree-green-light font-bold',
+          ].join(' ')}>
+          Scan Meals
+        </p>
+        {getMeal() !== null ? (
+          <>
+            <p className={['text-center text-xl mt-4 mb-4'].join(' ')}>
+              {/* Show day of the week */}
+              {new Date().toLocaleString('en-us', { weekday: 'long' })}{' '}
+              {getMeal()}
+            </p>
+            {/* Can't be a button because it will react to enter key */}
+            <p
+              onClick={handleScanButton}
+              className={[
+                'transition-all cursor-pointer border-2 border-transparent w-fit mx-auto mt-4 mb-2 px-6 py-2 rounded-lg text-lg',
+                // 'text-white bg-tree-green-light hover:bg-white hover:border-tree-green'
+                scanning
+                  ? 'text-white bg-red-500 hover:bg-red-600'
+                  : 'text-white bg-tree-green-light hover:bg-tree-green',
+              ].join(' ')}>
+              {scanning ? 'Stop Scanning' : 'Start Scanning'}
+            </p>
+          </>
         ) : (
-          <div className={['h-screen bg-[#fefafc]'].join(' ')}>
-            <nav
-              className={[
-                'sticky z-10 bg-white w-full shadow-md px-8 py-4 justify-center items-center flex font-roboto',
-              ].join(' ')}>
-              <div className={['max-w-6xl w-full flex'].join(' ')}>
-                <img
-                  src={logo}
-                  alt='logo'
-                  className='h-12'
-                />
-                <p
-                  className={[
-                    'text-3xl ml-4 h-12 leading-[3rem] text-tree-green-light',
-                  ].join(' ')}>
-                  tree
-                  <span className={['font-bold'].join(' ')}>hacks</span> meals
-                </p>
-                <Spacer />
-                <p
-                  onClick={logout}
-                  className={[
-                    'text-lg ml-4 h-12 leading-[3rem] hover:text-tree-green hover:cursor-pointer text-slate-500',
-                  ].join(' ')}>
-                  log out
-                </p>
-              </div>
-            </nav>
+          <p className={['text-center text-xl mt-6'].join(' ')}>
+            No meals available at this time
+          </p>
+        )}
 
-            <div
-              className={[
-                styles.body,
-                'font-roboto z-0 flex justify-center flex-col',
-              ].join(' ')}>
-              <p
-                className={[
-                  styles.title,
-                  'text-4xl mt-12 text-center text-tree-green-light font-bold',
-                ].join(' ')}>
-                Scan Meals
-              </p>
-              {getMeal() !== null ? (
-                <>
-                  <p className={['text-center text-xl mt-4 mb-4'].join(' ')}>
-                    {/* Show day of the week */}
-                    {getMeal()}
+        {scanning && (
+          <div
+            className={[
+              'mt-8 mx-auto transition-all flex justify-center items-center w-1/2 max-w-2xl min-h-96',
+              'border-2 rounded-xl flex flex-col text-center',
+              getBorderColor(),
+            ].join(' ')}>
+            {isFocused ? (
+              <>
+                {logs.length > 0 ? (
+                  <>
+                    <p className={['text-xl'].join(' ')}>User ID:</p>
+                    <p className={['text-xl text-tree-green'].join(' ')}>
+                      {user?.user_id}
+                    </p>
+                  </>
+                ) : (
+                  <p className={['text-2xl text-slate-500'].join(' ')}>
+                    Scan away!
                   </p>
-                  {/* Can't be a button because it will react to enter key */}
-                  <p
-                    onClick={handleScanButton}
-                    className={[
-                      'transition-all cursor-pointer border-2 border-transparent w-fit mx-auto mt-4 mb-2 px-6 py-2 rounded-lg text-lg',
-                      // 'text-white bg-tree-green-light hover:bg-white hover:border-tree-green'
-                      scanning
-                        ? 'text-white bg-red-500 hover:bg-red-600'
-                        : 'text-white bg-tree-green-light hover:bg-tree-green',
-                    ].join(' ')}>
-                    {scanning ? 'Stop Scanning' : 'Start Scanning'}
-                  </p>
-                </>
-              ) : (
-                <p className={['text-center text-xl mt-6'].join(' ')}>
-                  No meals available at this time
+                )}
+              </>
+            ) : (
+              <>
+                <p className={['text-2xl'].join(' ')}>Scanning Paused</p>
+                <p className={['text-md mt-2 text-slate-500'].join(' ')}>
+                  Click anywhere to resume
                 </p>
-              )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
-              {scanning && (
-                <div
-                  className={[
-                    'mt-8 mx-auto transition-all flex justify-center items-center w-1/2 max-w-2xl min-h-96',
-                    'border-2 rounded-xl flex flex-col text-center',
-                    getBorderColor(),
-                  ].join(' ')}>
-                  {isFocused ? (
-                    <>
-                      {logs.length > 0 ? (
-                        <>
-                          <p className={['text-xl'].join(' ')}>User ID:</p>
-                          <p className={[''].join(' ')}>{}</p>
-                        </>
-                      ) : (
-                        <p className={['text-2xl text-slate-500'].join(' ')}>
-                          Scan away!
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <p className={['text-2xl'].join(' ')}>Scanning Paused</p>
-                      <p className={['text-md mt-2 text-slate-500'].join(' ')}>
-                        Click anywhere to resume
-                      </p>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* <div id='form'>
+      {/* <div id='form'>
               <h1
                 style={{ marginTop: '0px', marginBottom: '10px' }}
                 id='formHeader'>
@@ -314,11 +332,8 @@ const Meals = ({ logout }) => {
                 onError={log('errors')}
               />
             </div> */}
-          </div>
-        )}
-      </>
-    );
-  }
+    </div>
+  );
 };
 
 export default Meals;
