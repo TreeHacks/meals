@@ -32,7 +32,7 @@ const Meals = ({ logout }) => {
   const [scannedCode, setScannedCode] = useState([]);
   const [isFocused, setIsFocused] = useState(true);
 
-  const extraneousKeys = ['Shift', 'Control', 'Alt', 'Meta'];
+  const extraneousKeys = ['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Tab'];
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -101,7 +101,12 @@ const Meals = ({ logout }) => {
     if (!isFocused) {
       return 'shadow-md';
     } else if (logs.length > 0) {
-      return 'shadow-lg shadow-tree-green border-tree-green';
+      if (true) {
+        return 'shadow-lg shadow-tree-green border-tree-green';
+      } else {
+        // Already scanned
+        return 'shadow-lg shadow-red-500 border-red-500';
+      }
     } else {
       // Scanning but no logs
       return 'border-slate-500';
@@ -116,6 +121,7 @@ const Meals = ({ logout }) => {
   const onBlur = useCallback(() => {
     console.log('Tab is blurred');
     setIsFocused(false);
+    setScannedCode([]);
   }, []);
 
   const handleScanButton = useCallback(() => {
@@ -138,18 +144,20 @@ const Meals = ({ logout }) => {
         ? user_info.response.status
         : 200;
       if (status !== 200) {
+        console.log("Error: You don't have access");
         setError("You don't have access");
         setDataFetched(true);
         return;
       }
-      console.log(user_info);
+      console.log("user", user_info);
       const meal_info = { mealList: user_info };
-      console.log(meal_info);
+      console.log("meal", meal_info);
       if (meal_info) {
         setDataFetched(true);
       }
     } catch (error) {
       // Handle error
+      console.log('error', error);
       setDataFetched(true);
       setError('Cannot fetch data');
     }
@@ -179,7 +187,8 @@ const Meals = ({ logout }) => {
   } else {
     return (
       <>
-        {error ? (
+        {/* Remove the ! */}
+        {!error ? (
           <div
             style={{
               backgroundColor: 'white',
@@ -244,7 +253,7 @@ const Meals = ({ logout }) => {
                   <p
                     onClick={handleScanButton}
                     className={[
-                      'transition-all cursor-pointer border-2 border-transparent w-fit mx-auto mt-4 mb-2 px-6 py-2 rounded-xl text-lg',
+                      'transition-all cursor-pointer border-2 border-transparent w-fit mx-auto mt-4 mb-2 px-6 py-2 rounded-lg text-lg',
                       // 'text-white bg-tree-green-light hover:bg-white hover:border-tree-green'
                       scanning
                         ? 'text-white bg-red-500 hover:bg-red-600'
@@ -270,7 +279,7 @@ const Meals = ({ logout }) => {
                     <>
                       {logs.length > 0 ? (
                         <>
-                          <p className={[''].join(' ')}>User ID:</p>
+                          <p className={['text-xl'].join(' ')}>User ID:</p>
                           <p className={[''].join(' ')}>{}</p>
                         </>
                       ) : (
