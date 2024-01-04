@@ -5,7 +5,7 @@ import API from '@aws-amplify/api';
 import Spacer from '../../components/spacer/spacer.component';
 
 import logo from './../../assets/logo.svg';
-import styles from './meals.module.scss';
+import styles from './home.module.scss';
 
 // const schema = {
 //   type: 'object',
@@ -90,7 +90,7 @@ const Meals = ({ logout }) => {
       });
 
       const meals = mealList.split(' ');
-      const status = meals.includes(mealCode) ? 'approved' : 'denied';
+      const status = !meals.includes(mealCode) ? 'approved' : 'denied';
 
       logs.push({
         code: user_id,
