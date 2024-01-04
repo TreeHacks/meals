@@ -37,7 +37,7 @@ const Meals = ({ logout }) => {
     const day = new Date()
       .toLocaleString('en-us', { weekday: 'short' })
       .toLowerCase();
-    const meal = getMeal()[0].toLowerCase();
+    const meal = getMeal()?.[0].toLowerCase();
 
     if (meal === null) {
       return null;
@@ -79,6 +79,11 @@ const Meals = ({ logout }) => {
       setError(null); // Reset error
 
       const mealCode = getMealCode();
+
+      if (mealCode === null) {
+        setError('No meal available at this time');
+        return;
+      }
 
       user_id = '702f951f-8719-445d-b277-eaa4ea49dd41';
 
@@ -196,6 +201,8 @@ const Meals = ({ logout }) => {
 
     if ('id' in queryParams && queryParams.id !== '') {
       setMode('manual');
+      console.log('manual', queryParams['id']);
+
       handleScan(queryParams['id']);
     }
   }, []);
