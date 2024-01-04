@@ -39,7 +39,7 @@ const Meals = ({ logout }) => {
       .toLowerCase();
     const meal = getMeal()?.[0].toLowerCase();
 
-    if (meal === null) {
+    if (meal === null || meal === undefined) {
       return null;
     }
 
@@ -313,61 +313,61 @@ const Meals = ({ logout }) => {
                 {scanning ? 'Stop Scanning' : 'Start Scanning'}
               </p>
             )}
+
+            {(scanning || mode === 'manual') && (
+              <div
+                className={[
+                  'mt-8 mx-auto transition-all flex justify-center items-center w-1/2 max-w-2xl min-h-96',
+                  'border-2 rounded-xl flex flex-col text-center',
+                  getBorderColor(),
+                ].join(' ')}>
+                {isFocused ? (
+                  <>
+                    {logs.length > 0 ? (
+                      <>
+                        <p className={['text-xl'].join(' ')}>User ID:</p>
+                        <p
+                          className={[
+                            'text-xl',
+                            logs[logs.length - 1].status === 'approved'
+                              ? 'text-tree-green'
+                              : 'text-red-500',
+                          ].join(' ')}>
+                          {user?.user_id}
+                        </p>
+                        <p
+                          className={[
+                            'text-xl mt-4',
+                            logs[logs.length - 1].status === 'approved'
+                              ? 'text-tree-green'
+                              : 'text-red-500',
+                          ].join(' ')}>
+                          {logs[logs.length - 1].status === 'approved'
+                            ? 'Approved'
+                            : 'Denied (already scanned)'}
+                        </p>
+                      </>
+                    ) : (
+                      <p className={['text-2xl text-slate-500'].join(' ')}>
+                        Scan away!
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className={['text-2xl'].join(' ')}>Scanning Paused</p>
+                    <p className={['text-md mt-2 text-slate-500'].join(' ')}>
+                      Click anywhere to resume
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
           </>
         ) : (
           <p className={['text-center text-xl mt-6'].join(' ')}>
             No meals available at this time
           </p>
-        )}
-
-        {(scanning || mode === 'manual') && (
-          <div
-            className={[
-              'mt-8 mx-auto transition-all flex justify-center items-center w-1/2 max-w-2xl min-h-96',
-              'border-2 rounded-xl flex flex-col text-center',
-              getBorderColor(),
-            ].join(' ')}>
-            {isFocused ? (
-              <>
-                {logs.length > 0 ? (
-                  <>
-                    <p className={['text-xl'].join(' ')}>User ID:</p>
-                    <p
-                      className={[
-                        'text-xl',
-                        logs[logs.length - 1].status === 'approved'
-                          ? 'text-tree-green'
-                          : 'text-red-500',
-                      ].join(' ')}>
-                      {user?.user_id}
-                    </p>
-                    <p
-                      className={[
-                        'text-xl mt-4',
-                        logs[logs.length - 1].status === 'approved'
-                          ? 'text-tree-green'
-                          : 'text-red-500',
-                      ].join(' ')}>
-                      {logs[logs.length - 1].status === 'approved'
-                        ? 'Approved'
-                        : 'Denied (already scanned)'}
-                    </p>
-                  </>
-                ) : (
-                  <p className={['text-2xl text-slate-500'].join(' ')}>
-                    Scan away!
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
-                <p className={['text-2xl'].join(' ')}>Scanning Paused</p>
-                <p className={['text-md mt-2 text-slate-500'].join(' ')}>
-                  Click anywhere to resume
-                </p>
-              </>
-            )}
-          </div>
         )}
       </div>
 
