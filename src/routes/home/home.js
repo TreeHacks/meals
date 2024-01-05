@@ -28,7 +28,7 @@ const Meals = ({ logout }) => {
       return 'Breakfast';
     } else if (hour > 11 && hour < 14) {
       return 'Lunch';
-    } else if (hour > 17 && hour < 21) {
+    } else if (hour > 17 && hour < 24) {
       return 'Dinner';
     } else {
       return null;
@@ -107,14 +107,14 @@ const Meals = ({ logout }) => {
         return;
       }
 
-      user_id = '702f951f-8719-445d-b277-eaa4ea49dd41';
+      // user_id = '702f951f-8719-445d-b277-eaa4ea49dd41';
 
       const user_info = await fetchUserData(user_id);
 
       console.log('after', error, user_info);
 
       if (error === null && user_info !== null) {
-        const mealList = user_info.mealList;
+        const mealList = user_info?.mealList || '';
 
         setUser({
           user_id: user_id,
@@ -263,7 +263,9 @@ const Meals = ({ logout }) => {
 
         console.log(code);
 
-        const queryParams = queryString.parse(code); // Parse url to get user id
+        const queryParams = queryString.parseUrl(code)['query'];
+
+        console.log('queryParams - sca', queryParams);
 
         if ('id' in queryParams && queryParams.id !== '') {
           handleScan(queryParams['id']);
